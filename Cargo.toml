@@ -1,0 +1,28 @@
+[package]
+name = "hello_evergreen"
+version = "0.1.0"
+authors = []
+
+[dependencies]
+getopts = "0.2"
+image = "*"
+libc = "*"
+num = "*"
+num-derive = "*"
+
+[dependencies.ioctl]
+version = "*"
+# path = "../ioctl"
+
+[dependencies.xcb]
+version = "*"
+features = ["dri3"]
+
+[dependencies.wayland-client]
+version = "*"
+# path = "../wayland-client-rs/wayland-client/"
+
+[dependencies.wayland-protocols]
+version = "*"
+features = ["unstable_protocols", "client"]
+# path = "../wayland-client-rs/wayland-protocols/"
