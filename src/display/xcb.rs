@@ -101,7 +101,7 @@ pub fn xcbmain(fd: i32, handle: u32) -> bool {
 						conn.flush();
 					},
 					xcb::CLIENT_MESSAGE => {
-						let cmev = xcb::cast_event::<xcb::ClientMessageEvent>(&event);
+						let cmev = unsafe { xcb::cast_event::<xcb::ClientMessageEvent>(&event) };
 						if cmev.type_() == wm_protocols && cmev.format() == 32 {
 							let protocol = cmev.data().data32()[0];
 							if protocol == wm_delete_window {

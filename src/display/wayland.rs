@@ -8,8 +8,8 @@ use wayland_client::protocol::{wl_surface, wl_shm_pool, wl_buffer, wl_compositor
                                wl_subcompositor, wl_shm, wl_shell_surface, wl_seat};
 
 use wayland_protocols;
-use wayland_protocols::unstable::linux_dmabuf::client::zwp_linux_dmabuf_v1;
-use wayland_protocols::unstable::linux_dmabuf::client::zwp_linux_buffer_params_v1;
+use wayland_protocols::unstable::linux_dmabuf::v1::client::zwp_linux_dmabuf_v1;
+use wayland_protocols::unstable::linux_dmabuf::v1::client::zwp_linux_buffer_params_v1;
 
 wayland_env!(WaylandEnv,
 	compositor: wl_compositor::WlCompositor,
@@ -25,57 +25,73 @@ struct HelloRadeonWindow {
 
 unsafe impl std::marker::Send for HelloRadeonWindow {}
 
-impl wayland_protocols::unstable::linux_dmabuf::client::zwp_linux_buffer_params_v1::Handler for HelloRadeonWindow {
-	fn created(&mut self,
-	           _: &mut EventQueueHandle,
-	           proxy: &zwp_linux_buffer_params_v1::ZwpLinuxBufferParamsV1,
-	           buffer: wl_buffer::WlBuffer)
-	{
-		println!("created buf");
-		self.s.attach(Some(&buffer), 0, 0);
-		self.s.commit();
-		self.buf = Some(buffer);
-		proxy.destroy();
-	}
-	fn failed(&mut self,
-	          evqh: &mut EventQueueHandle,
-	          proxy: &zwp_linux_buffer_params_v1::ZwpLinuxBufferParamsV1)
-	{
-		
-		proxy.destroy();
-		print!("{:?}", unsafe{ &*self.display }.last_error().expect("wayland buffer sharing failed but no error code"));
-		panic!("wayland buffer sharing failed");
-	}
+fn buffer_param_create__created(_: &mut EventQueueHandle,
+           self_: &mut HelloRadeonWindow,
+           proxy: &zwp_linux_buffer_params_v1::ZwpLinuxBufferParamsV1,
+           buffer: wl_buffer::WlBuffer)
+{
+	println!("created buf");
+	self_.s.attach(Some(&buffer), 0, 0);
+	self_.s.commit();
+	self_.buf = Some(buffer);
+	proxy.destroy();
 }
 
-impl wayland_protocols::unstable::linux_dmabuf::client::zwp_linux_dmabuf_v1::Handler for HelloRadeonWindow {
-	fn format(&mut self,
-	          evqh: &mut EventQueueHandle,
-	          proxy: &zwp_linux_dmabuf_v1::ZwpLinuxDmabufV1,
-	          format: u32)
-	{
-		println!("found format {}{}{}{}",
-			(format as u8 as char), ((format >> 8) as u8 as char),
-			((format >> 16) as u8 as char), ((format >> 24) as u8 as char));
-	}
-}
-
-impl wl_shell_surface::Handler for HelloRadeonWindow {
-	fn ping(&mut self, _: &mut EventQueueHandle, me: &wl_shell_surface::WlShellSurface, serial: u32) {
-		println!("ping-pong");
-		me.pong(serial);
-	}
+fn buffer_param_create__failed(evqh: &mut EventQueueHandle,
+	      self_: &mut HelloRadeonWindow,
+          proxy: &zwp_linux_buffer_params_v1::ZwpLinuxBufferParamsV1)
+{
 	
-	// we ignore the other methods in this example, by default they do nothing
+	proxy.destroy();
+	print!("{:?}", unsafe{ &*self_.display }.last_error().expect("wayland buffer sharing failed but no error code"));
+	panic!("wayland buffer sharing failed");
 }
 
-declare_handler!(HelloRadeonWindow, wayland_protocols::unstable::linux_dmabuf::client::zwp_linux_buffer_params_v1::Handler,
-	wayland_protocols::unstable::linux_dmabuf::client::zwp_linux_buffer_params_v1::ZwpLinuxBufferParamsV1);
+const buffer_param_create__implementation:
+	wayland_protocols::unstable::linux_dmabuf::v1::client::zwp_linux_buffer_params_v1::Implementation<HelloRadeonWindow>
+=
+	wayland_protocols::unstable::linux_dmabuf::v1::client::zwp_linux_buffer_params_v1::Implementation {
+		created: buffer_param_create__created,
+		failed:  buffer_param_create__failed
+	};
 
-declare_handler!(HelloRadeonWindow, wayland_protocols::unstable::linux_dmabuf::client::zwp_linux_dmabuf_v1::Handler,
-	wayland_protocols::unstable::linux_dmabuf::client::zwp_linux_dmabuf_v1::ZwpLinuxDmabufV1);
 
-declare_handler!(HelloRadeonWindow, wl_shell_surface::Handler, wl_shell_surface::WlShellSurface);
+fn dmabuf_create_params__format(
+          evqh: &mut EventQueueHandle,
+	      self_: &mut (),
+          proxy: &zwp_linux_dmabuf_v1::ZwpLinuxDmabufV1,
+          format: u32)
+{
+	println!("found format {}{}{}{}",
+		(format as u8 as char), ((format >> 8) as u8 as char),
+		((format >> 16) as u8 as char), ((format >> 24) as u8 as char));
+}
+
+const dmabuf_create_params__implementation:
+	wayland_protocols::unstable::linux_dmabuf::v1::client::zwp_linux_dmabuf_v1::Implementation<()>
+=
+	wayland_protocols::unstable::linux_dmabuf::v1::client::zwp_linux_dmabuf_v1::Implementation {
+		format: dmabuf_create_params__format,
+		modifier: |_, _, _, _, _, _| {}
+	};
+
+fn shell_surface_impl() -> wl_shell_surface::Implementation<()> {
+    wl_shell_surface::Implementation {
+        ping: |_, _, shell_surface, serial| {
+            shell_surface.pong(serial);
+        },
+        configure: |_, _, _, _, _, _| { /* not used in this example */ },
+        popup_done: |_, _, _| { /* not used in this example */ },
+    }
+}
+
+//declare_handler!(HelloRadeonWindow, wayland_protocols::unstable::linux_dmabuf::v1::client::zwp_linux_buffer_params_v1::Handler,
+//	wayland_protocols::unstable::linux_dmabuf::v1::client::zwp_linux_buffer_params_v1::ZwpLinuxBufferParamsV1);
+
+//declare_handler!(HelloRadeonWindow, wayland_protocols::unstable::linux_dmabuf::v1::client::zwp_linux_dmabuf_v1::Handler,
+//	wayland_protocols::unstable::linux_dmabuf::v1::client::zwp_linux_dmabuf_v1::ZwpLinuxDmabufV1);
+
+//declare_handler!(HelloRadeonWindow, wl_shell_surface::Handler, wl_shell_surface::WlShellSurface);
 
 
 pub fn waylandmain(fd: i32, handle: u32) -> bool {
@@ -86,9 +102,9 @@ pub fn waylandmain(fd: i32, handle: u32) -> bool {
 
 	let display = display;
 
-	let envid = event_queue.add_handler(EnvHandler::<WaylandEnv>::new());
-	let registry = display.get_registry().expect("Display cannot be already destroyed.");
-	event_queue.register::<_, EnvHandler<WaylandEnv>>(&registry, envid);
+	//let envid = event_queue.add_handler(EnvHandler::<WaylandEnv>::new());
+	let registry = display.get_registry(); //.expect("Display cannot be already destroyed.");
+	let env_token = EnvHandler::<WaylandEnv>::init(&mut event_queue, &registry);
 
 	// prepare the decorated surface
 	let (dmabufid, window, shell_surface, buffer_params) = {
@@ -101,7 +117,7 @@ pub fn waylandmain(fd: i32, handle: u32) -> bool {
 				// introduce a new scope because .state() borrows the event_queue
 				let state = event_queue.state();
 				// retrieve the EnvHandler
-				let env = state.get_handler::<EnvHandler<WaylandEnv>>(envid);
+				let env = state.get(&env_token); //.clone_inner().unwrap();
 				if first {
 					println!("Globals advertised by server:");
 					for &(name, ref interface, version) in env.globals() {
@@ -116,20 +132,19 @@ pub fn waylandmain(fd: i32, handle: u32) -> bool {
 			println!("env not ready. syncing...");
 		}
 
-		let state = event_queue.state();
-		let env = state.get_handler::<EnvHandler<WaylandEnv>>(envid);
+		let env = event_queue.state().get(&env_token).clone_inner().unwrap();
 		let dmabufid = 0; //state.add_handler(&env.linux_dmabuf);
 
-		let surface = env.compositor.create_surface().expect("Compositor cannot be destroyed");
-		let shell_surface = env.shell.get_shell_surface(&surface).expect("Shell cannot be destroyed");
+		let surface = env.compositor.create_surface(); //.expect("Compositor cannot be destroyed");
+		let shell_surface = env.shell.get_shell_surface(&surface); //.expect("Shell cannot be destroyed");
 
 
 		let mut ph = DrmPrimeHandle::default();
 		ph.handle = handle;
-		unsafe { drm_ioctl_prime_handle_to_fd(fd, &mut ph) };
+		unsafe { drm_ioctl_prime_handle_to_fd(fd, &mut ph) }.unwrap();
 		let cbfd = ph.fd;
 
-
+		event_queue.register(&env.linux_dmabuf, dmabuf_create_params__implementation, ());
 		let buffer_params = env.linux_dmabuf.create_params().expect("got no buffer params object");
 		buffer_params.add(cbfd, 0, 0, W*4, 0, 0);
 
@@ -155,9 +170,9 @@ pub fn waylandmain(fd: i32, handle: u32) -> bool {
 		(dmabufid, window, shell_surface, buffer_params)
 	};
 
-	let winid = event_queue.add_handler(window);
-	event_queue.register::<_, HelloRadeonWindow>(&shell_surface, winid);
-	event_queue.register::<_, HelloRadeonWindow>(&buffer_params, winid);
+	//let winid = event_queue.add_handler(window);
+    event_queue.register(&shell_surface, shell_surface_impl(), ());
+	event_queue.register(&buffer_params, buffer_param_create__implementation, window);
 
 	// {
 	//     let state = event_queue.state();

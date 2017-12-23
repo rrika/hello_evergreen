@@ -5,14 +5,14 @@ authors = []
 
 [dependencies]
 getopts = "0.2"
-image = "*"
 libc = "*"
 num = "*"
 num-derive = "*"
+nix = "*"
 
-[dependencies.ioctl]
+[dependencies.image]
 version = "*"
-# path = "../ioctl"
+features = ["png_codec"]
 
 [dependencies.xcb]
 version = "*"
@@ -20,6 +20,8 @@ features = ["dri3"]
 
 [dependencies.wayland-client]
 version = "*"
+default-features = false # opt out of wayland-egl dependency
+features = ["cursor"]
 # path = "../wayland-client-rs/wayland-client/"
 
 [dependencies.wayland-protocols]

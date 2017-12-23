@@ -2,7 +2,7 @@ extern crate num;
 #[macro_use]
 extern crate num_derive;
 #[macro_use]
-extern crate ioctl;
+extern crate nix;
 extern crate libc;
 extern crate image;
 extern crate getopts;

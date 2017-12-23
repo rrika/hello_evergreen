@@ -3,7 +3,7 @@
 
 use std;
 use std::marker::PhantomData;
-use ioctl::*;
+use nix::sys::ioctl;
 
 pub const RADEON_GEM_DOMAIN_CPU: u32 = 0x1;
 pub const RADEON_GEM_DOMAIN_GTT: u32 = 0x2;
@@ -30,7 +30,7 @@ const DRM_RADEON_UCODE_UPDATE: u32		= 0x2e;
 
 ioctl!(readwrite drm_ioctl_radeon_cs with DRM_IOCTL_BASE, DRM_COMMAND_BASE + DRM_RADEON_CS; DrmRadeonCs);
 ioctl!(readwrite drm_ioctl_radeon_info with DRM_IOCTL_BASE, DRM_COMMAND_BASE + DRM_RADEON_INFO; DrmRadeonInfo);
-ioctl!(write drm_ioctl_gem_close with DRM_IOCTL_BASE, 0x09; /*struct*/ DrmGemClose);
+ioctl!(write_ptr drm_ioctl_gem_close with DRM_IOCTL_BASE, 0x09; /*struct*/ DrmGemClose);
 ioctl!(readwrite drm_ioctl_radeon_gem_busy with DRM_IOCTL_BASE, DRM_COMMAND_BASE + DRM_RADEON_GEM_BUSY; /*struct*/ DrmRadeonGemBusy);
 ioctl!(readwrite drm_ioctl_radeon_gem_create with DRM_IOCTL_BASE, DRM_COMMAND_BASE + DRM_RADEON_GEM_CREATE; /*struct*/ DrmRadeonGemCreate);
 ioctl!(readwrite drm_ioctl_radeon_gem_get_tiling with DRM_IOCTL_BASE, DRM_COMMAND_BASE + DRM_RADEON_GEM_GET_TILING; /*struct*/ DrmRadeonGemTiling);
@@ -42,12 +42,12 @@ ioctl!(readwrite drm_ioctl_radeon_gem_pwrite with DRM_IOCTL_BASE, DRM_COMMAND_BA
 ioctl!(readwrite drm_ioctl_radeon_gem_set_domain with DRM_IOCTL_BASE, DRM_COMMAND_BASE + DRM_RADEON_GEM_SET_DOMAIN; /*struct*/ DrmRadeonGemSetDomain);
 ioctl!(readwrite drm_ioctl_radeon_gem_set_tiling with DRM_IOCTL_BASE, DRM_COMMAND_BASE + DRM_RADEON_GEM_SET_TILING; /*struct*/ DrmRadeonGemTiling);
 ioctl!(readwrite drm_ioctl_radeon_gem_va with DRM_IOCTL_BASE, DRM_COMMAND_BASE + DRM_RADEON_GEM_VA; /*struct*/ DrmRadeonGemVa);
-ioctl!(write drm_ioctl_radeon_gem_wait_idle with DRM_IOCTL_BASE, DRM_COMMAND_BASE + DRM_RADEON_GEM_WAIT_IDLE; /*struct*/ DrmRadeonGemWaitIdle);
+ioctl!(write_ptr drm_ioctl_radeon_gem_wait_idle with DRM_IOCTL_BASE, DRM_COMMAND_BASE + DRM_RADEON_GEM_WAIT_IDLE; /*struct*/ DrmRadeonGemWaitIdle);
 ioctl!(readwrite drm_ioctl_prime_handle_to_fd with DRM_IOCTL_BASE,
 	/* how did this ever work */
 	/* DRM_COMMAND_BASE + */
 	0x2d; /*struct*/ DrmPrimeHandle);
-ioctl!(write drm_ioctl_radeon_ucode_update with DRM_IOCTL_BASE, DRM_COMMAND_BASE + DRM_RADEON_UCODE_UPDATE; /*struct*/ DrmRadeonUcodeUpdate);
+ioctl!(write_ptr drm_ioctl_radeon_ucode_update with DRM_IOCTL_BASE, DRM_COMMAND_BASE + DRM_RADEON_UCODE_UPDATE; /*struct*/ DrmRadeonUcodeUpdate);
 
 #[repr(C)]
 #[derive(Default)]
