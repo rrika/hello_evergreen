@@ -9,7 +9,7 @@ libc = "0.2.34"
 num = "*"
 num-traits = "*"
 num-derive = "*"
-nix = "0.10"
+nix = "0.11"
 
 [dependencies.image]
 version = "0.18"
