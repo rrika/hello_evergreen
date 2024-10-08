@@ -4,8 +4,8 @@ version = "0.1.0"
 authors = []
 
 [dependencies]
-getopts = "0.2"
-libc = "0.2.34"
+getopts = "0.2.21"
+libc = "0.2.159"
 num = "*"
 num-traits = "*"
 num-derive = "*"
