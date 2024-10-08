@@ -356,7 +356,7 @@ fn main() {
 	let backend = if let Some(backend_str) = matches.opt_str("backend") {
 		backend_from_str(backend_str.as_str()).expect("unrecognized backend")
 	}
-	else if let Ok(_) = wayland_client::default_connect() { Backend::Wayland }
+	else if let Ok(_) = wayland_client::Display::connect_to_env() { Backend::Wayland }
 	else if let Ok(_) = xcb::Connection::connect(None) { Backend::Xcb }
 	else { Backend::Kms };
 

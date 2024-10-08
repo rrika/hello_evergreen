@@ -20,12 +20,12 @@ version = "0.8.1"
 features = ["dri3"]
 
 [dependencies.wayland-client]
-version = "0.12.4"
+version = "0.23"
 default-features = false # opt out of wayland-egl dependency
 features = ["cursor"]
 # path = "../wayland-client-rs/wayland-client/"
 
 [dependencies.wayland-protocols]
-version = "0.12.4"
+version = "0.23"
 features = ["unstable_protocols", "client"]
 # path = "../wayland-client-rs/wayland-protocols/"
